@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-Краткое пояснение (не является частью лицензии; действует английский текст выше).
-Программа бесплатна: вы можете скачивать, устанавливать, изменять и распространять её, в том числе в коммерческих целях,
-при условии сохранения этого уведомления об авторских правах. Гарантий нет, ответственность авторов исключена.
-
-Компоненты и модели третьих лиц, которые устанавливаются вместе с программой (PostgreSQL, nginx, Docker, Ollama, PyTorch,
-GigaAM, модели Qwen, Gemma и другие), распространяются на собственных условиях их правообладателей и не входят в эту лицензию.

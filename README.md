@@ -27,5 +27,5 @@ sudo ./install.sh --domain callqa.example.com --with-llm
 Версия 0.1.0. Протестировано на RHEL 10 (Docker CE, без GPU). Ubuntu, Podman, GPU и офлайн-пакет ещё не проверены.
 
 ## Лицензия
-[MIT](LICENSE), © 2026 ИП no-bugs.
+[MIT](LICENSE), © 2026 ИП no-bugs. Сведения о компонентах и моделях третьих лиц — в [NOTICE](NOTICE).
 
