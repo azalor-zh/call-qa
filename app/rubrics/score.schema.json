@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "callqa score",
+  "description": "Ответ модели по одному звонку. Итоговый балл считает код по весам, не модель.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rubric", "rubric_version", "items", "summary", "topic", "outcome", "flags"],
+  "properties": {
+    "rubric": { "type": "string" },
+    "rubric_version": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "score", "evidence", "reason", "confidence"],
+        "properties": {
+          "code": { "type": "string" },
+          "score": { "type": ["integer", "null"], "minimum": 0, "maximum": 2 },
+          "evidence": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["t", "speaker", "quote"],
+              "properties": {
+                "t": { "type": "string", "pattern": "^[0-9]{1,2}:[0-5][0-9]$" },
+                "speaker": { "type": "string", "enum": ["employee", "client"] },
+                "quote": { "type": "string", "maxLength": 300 }
+              }
+            }
+          },
+          "reason": { "type": "string", "maxLength": 300 },
+          "confidence": { "type": "string", "enum": ["low", "medium", "high"] }
+        }
+      }
+    },
+    "summary": { "type": "string", "maxLength": 600 },
+    "topic": { "type": "string", "maxLength": 100 },
+    "outcome": { "type": "string", "enum": ["agreed", "not_agreed", "needs_followup", "resolved", "escalated", "other"] },
+    "flags": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["conflict", "complaint", "critical_violation", "poor_audio", "not_a_client_call"] }
+    }
+  }
+}
+

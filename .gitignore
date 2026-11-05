@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.env
+*.env
+deploy/volumes/
+volumes/
+*.toml
+!collector/config.example.toml
+*.db
+*.sqlite
+# тестовые записи звонков и тяжёлые результаты замеров (персональные данные)
+bench/asr-ru-audio/
+bench/results/
+*.mp3
+*.wav

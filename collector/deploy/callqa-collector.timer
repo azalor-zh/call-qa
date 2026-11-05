@@ -1,0 +1,10 @@
+[Unit]
+Description=Call QA collector: опрос АТС каждые 15 минут
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

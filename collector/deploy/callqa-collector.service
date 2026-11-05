@@ -1,0 +1,10 @@
+[Unit]
+Description=Call QA collector (records from PBX to Call QA)
+After=network-online.target callqa-web.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/callqa/collector/collector.py --config /etc/callqa/collector.toml
+NoNewPrivileges=true
+PrivateTmp=true
+StateDirectory=callqa-collector

@@ -1,0 +1,71 @@
+# Call QA: Docker Compose (работает и с `podman compose`).
+# Метки :z на томах нужны для SELinux (RHEL/Rocky); на других системах игнорируются.
+# Запуск: ./install.sh [--with-llm] [--gpu]  (создаёт .env со случайными паролями и сертификат), затем docker compose up -d
+# Оценка звонков: либо встроенный Ollama (профиль llm, --with-llm), либо внешний API — выбор в админке «Модели».
+name: callqa
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: callqa
+      POSTGRES_USER: callqa
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?run install.sh}
+    volumes:
+      - ${DATA_DIR:-./volumes}/pg:/var/lib/postgresql/data:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U callqa -d callqa"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: callqa-app:${CALLQA_VERSION:-latest}
+    build:
+      context: ../app
+      dockerfile: ../deploy/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      CALLQA_PG_DSN: postgresql://callqa:${DB_PASSWORD}@db:5432/callqa
+      CALLQA_WEB_USER: ${ADMIN_USER:-admin}
+      CALLQA_WEB_PASSWORD: ${ADMIN_PASSWORD:?run install.sh}
+      CALLQA_BASE_URL: ${BASE_URL:?set BASE_URL in .env}
+      # локальный сервер моделей; по умолчанию встроенный Ollama (если не запущен — используйте внешний API в админке)
+      CALLQA_LLM_URL: ${LLM_URL:-http://ollama:11434/v1}
+      CALLQA_LLM_KEY: ${LLM_KEY:-}
+      CALLQA_LLM_MODEL: ${LLM_MODEL:-}
+      CALLQA_LLM_NO_THINK: ${LLM_NO_THINK:-1}
+      CALLQA_MAX_MB: ${MAX_UPLOAD_MB:-200}
+      CALLQA_TG_TOKEN: ${TG_TOKEN:-}
+    volumes:
+      - ${DATA_DIR:-./volumes}/data:/data:z
+      - ${DATA_DIR:-./volumes}/models:/models:z
+    expose:
+      - "8130"
+
+  # Встроенный сервер локальных LLM. Включается профилем llm (install.sh --with-llm).
+  # Модели скачиваются из админки (Модели → каталог) или вручную: docker compose exec ollama ollama pull qwen3:14b
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["llm"]
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR:-./volumes}/models/ollama:/root/.ollama:z
+    environment:
+      OLLAMA_KEEP_ALIVE: 24h
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro,z
+      - ${DATA_DIR:-./volumes}/certs:/etc/nginx/ssl:ro,z

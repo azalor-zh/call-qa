@@ -1,0 +1,44 @@
+# Пример конфига collector Call QA. Секреты — только в файлах, путь к которым указан здесь.
+# Каждая АТС — отдельный блок [[source]]. Новый клиент или АТС = новый блок, код не меняется.
+
+[callqa]                                   # значения по умолчанию для всех источников
+url = "http://127.0.0.1:8130"
+api_key_file = "/etc/callqa/collector-callqa.key"   # ключ API клиента-владельца записей (одна строка)
+
+[[source]]
+name = "pbx-main"
+enabled = true
+adapter = "freepbx"
+rubric = "sales"                           # чек-лист по умолчанию (ключ из /api/v1/checklists)
+lang = ""                                  # "" — авто; ru / kk
+days_back = 2                              # окно опроса журнала, сутки
+max_per_cycle = 20                         # защита очереди при первом подключении
+give_up_hours = 72                         # через сколько часов перестать ждать недоступную запись
+state_db = "/var/lib/callqa-collector/pbx-main.db"
+
+# [source.callqa]                          # ключ другого клиента для этой АТС (если отличается)
+# api_key_file = "/etc/callqa/collector-other.key"
+
+[source.filter]
+extensions = ["152"]                       # какие добавочные брать; пусто = все
+directions = ["in", "out", "internal"]     # in | out | internal
+min_billsec = 10                           # минимальная длительность разговора, сек (в docs/06 — 20)
+answered_only = true
+not_before = "2026-11-05 00:00:00"         # не брать более старые звонки (время АТС)
+
+[source.employees]                         # добавочный → имя сотрудника (иначе ищем по телефону в справочнике Call QA)
+"152" = "Иванов Иван"
+
+[source.rubrics]                           # чек-лист по добавочному (иначе rubric выше)
+# "152" = "support"
+
+[source.freepbx]
+api_base = "http://pbx.example.com:83/admin/api/api"
+api_credentials_file = "/etc/callqa/freepbx_api.txt"   # строки client_id=… и client_secret=…
+scope = "gql:cdr"
+ssh_host = "pbx.example.com"
+ssh_user = "callqa"                        # отдельный пользователь, только чтение (не root)
+ssh_key = "/etc/callqa/freepbx_ssh_key"
+monitor_dir = "/var/spool/asterisk/monitor"
+ext_regex = '^(?:PJSIP|SIP|IAX2)/(\d{2,6})-'   # где в канале звонка искать добавочный
+settle_seconds = 120                       # файл не должен меняться столько секунд

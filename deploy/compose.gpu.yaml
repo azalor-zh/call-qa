@@ -1,0 +1,11 @@
+# Добавка для видеокарты NVIDIA под встроенный Ollama. Нужны драйвер и nvidia-container-toolkit.
+# install.sh --gpu прописывает COMPOSE_FILE=compose.yaml:compose.gpu.yaml в .env.
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
